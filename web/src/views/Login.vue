@@ -59,7 +59,7 @@ export default {
         const res = await rest.json()
         if(res != "Email ou Senha Incorretos"){
           localStorage.setItem("token", res)
-
+          localStorage.setItem("email", formDta.get("email"))
          
         }else{
           this.$swal.fire({

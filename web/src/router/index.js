@@ -4,6 +4,7 @@ import Router from "vue-router"
 const Login = () => import("@/views/Login")
 const Home = () => import("@/views/Home")
 const Cadastro = () => import("@/views/Cadastro")
+const Perfil = () => import("@/views/Perfil")
 
 Vue.use(Router)
 
@@ -41,6 +42,11 @@ var router = new Router({
             path:"/cadastro",
             name:"Cadastro",
             component:Cadastro
+        },
+        {
+            path:"/perfil",
+            name:"Perfil",
+            component:Perfil
         }
     ]
 })

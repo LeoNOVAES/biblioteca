@@ -15,8 +15,9 @@ import (
 )
 
 type User struct {
-	ID   int    `json:"id"`
-	NOME string `json:"name"`
+	ID    int    `json:"id"`
+	EMAIL string `json:"email"`
+	NOME  string `json:"name"`
 }
 
 type Endereco struct {
@@ -66,8 +67,6 @@ func auth(c *gin.Context) {
 func isLogin(c *gin.Context) {
 	reqEmail := c.PostForm("email")
 	reqPassword := c.PostForm("password")
-
-	fmt.Print("========="+reqEmail)
 
 	senha := encriptar(reqPassword)
 
@@ -157,6 +156,15 @@ func encriptar(value string) string {
 	passByte := md5.New()
 	passByte.Write([]byte(value))
 	return hex.EncodeToString(passByte.Sum(nil))
+}
+
+func getUser(c *gin.Context) {
+	email := c.Param("email")
+	var user User
+
+	db.QueryRow("SELECT id,nome,email FROM users WHERE email = ?", email).Scan(&user.ID, &user.NOME, &user.EMAIL)
+
+	c.JSON(200, user)
 }
 
 func cadastroUser(c *gin.Context) {
@@ -332,6 +340,7 @@ func main() {
 	router.POST("/deleteUser/", auth, deletarUser)
 	router.POST("/isLogin/", isLogin)
 	router.GET("/getLivros/:id", auth, getLivros)
+	router.GET("/getUser/:email", auth, getUser)
 	router.DELETE("/deleteLivro/:id/:livro", auth, deleteLivro)
 	router.Run(":9000")
 }

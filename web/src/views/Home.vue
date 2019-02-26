@@ -1,21 +1,26 @@
 <template>
     <div>
-    <h1>Home</h1>
-     <button @click="sair()">Sair</button>
+        <Header/>
+        <div class="container-fluid bg-success banner" >
+            
+        </div>  
     </div>
 </template>
 
 <script>
+import Header from "@/views/Header"
+
 export default {
-    methods:{
-        sair(){
-            localStorage.removeItem("token")
-             location.reload();     
-        }
-    }
+    components:{Header}
+   
 }
 </script>
 
 <style >
-
+    .banner{
+       background-image: url("../../public/img/banner.jpg");
+       background-repeat: no-repeat;
+       background-size: 100% 100%;
+       height:450px
+    }
 </style>
