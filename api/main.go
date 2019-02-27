@@ -5,27 +5,24 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"strconv"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type User struct {
-	ID    int    `json:"id"`
-	EMAIL string `json:"email"`
-	NOME  string `json:"name"`
-}
-
-type Endereco struct {
 	ID     int    `json:"id"`
+	EMAIL  string `json:"email"`
+	NOME   string `json:"name"`
 	CIDADE string `json:"cidade"`
 	BAIRRO string `json:"bairro"`
 	RUA    string `json:"rua"`
-	IDUSER int    `json:"id_user"`
 }
 
 type Livros struct {
@@ -42,6 +39,21 @@ type Estante struct {
 }
 
 var db, err = sql.Open("mysql", "leandro:123456@/biblioteca")
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
 
 func auth(c *gin.Context) {
 	tokenString := c.Request.Header.Get("Authorization")
@@ -163,6 +175,21 @@ func getUser(c *gin.Context) {
 	var user User
 
 	db.QueryRow("SELECT id,nome,email FROM users WHERE email = ?", email).Scan(&user.ID, &user.NOME, &user.EMAIL)
+
+	c.JSON(200, user)
+}
+
+func getTotDadosUser(c *gin.Context) {
+	id := c.Param("id")
+
+	var user User
+
+	db.QueryRow(`SELECT u.id ,u.nome, u.email, e.cidade , e.bairro, e.rua FROM users u
+	JOIN ligacao1 l 
+	ON l.id_user = u.id
+	JOIN endereco e
+	ON l.id_user = e.id_user
+	WHERE l.id_user = ?`, id).Scan(&user.ID, &user.NOME, &user.EMAIL, &user.CIDADE, &user.BAIRRO, &user.RUA)
 
 	c.JSON(200, user)
 }
@@ -301,6 +328,100 @@ func deleteLivro(c *gin.Context) {
 	c.JSON(200, "Excluido com sucesso")
 }
 
+func emailVerify(email string) string {
+	var e string
+	db.QueryRow("SELECT email FROM users WHERE email = ? ", email).Scan(&e)
+	return e
+}
+
+func alterarUser(c *gin.Context) {
+	id := c.Param("id")
+	name := c.PostForm("nome")
+	cidade := c.PostForm("cidade")
+	rua := c.PostForm("rua")
+	bairro := c.PostForm("bairro")
+	password := c.PostForm("password")
+
+	pass := encriptar(password)
+
+	if len(name) > 0 {
+		stmt, _ := db.Prepare("UPDATE users SET nome = ?  WHERE id = ?")
+		stmt.Exec(name, id)
+	}
+
+	if len(password) > 0 {
+		stmtP, _ := db.Prepare("UPDATE users SET password = ?  WHERE id = ?")
+		stmtP.Exec(pass, id)
+	}
+
+	if len(cidade) > 0 {
+		stmtC, _ := db.Prepare("UPDATE endereco SET cidade = ? WHERE id_user = ?")
+		stmtC.Exec(cidade, id)
+	}
+
+	if len(rua) > 0 {
+		stmtR, _ := db.Prepare("UPDATE endereco SET rua = ?  WHERE id_user = ?")
+		stmtR.Exec(rua, id)
+	}
+
+	if len(bairro) > 0 {
+		stmtB, _ := db.Prepare("UPDATE endereco SET bairro = ?  WHERE id_user = ?")
+		stmtB.Exec(bairro, id)
+	}
+
+	c.JSON(200, "Alterado com Sucesso")
+
+}
+
+func uploadAvatar(c *gin.Context) {
+	id := c.Param("id")
+	file, header, err := c.Request.FormFile("avatar")
+	data, _ := ioutil.ReadAll(file)
+
+	t := time.Now()
+	n := t.Format("20060102150405")
+	timeStampF := string(n)
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	err = ioutil.WriteFile("./avatares/"+header.Filename+timeStampF+".png", data, 0666)
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	caminho := "/avatar/" + header.Filename + timeStampF + ".png"
+
+	var qtdImage int
+	db.QueryRow("SELECT COUNT(path) FROM avatar WHERE id_user = ?", id).Scan(&qtdImage)
+
+	if qtdImage > 1 {
+		stmtUp, _ := db.Prepare("UPDATE avatar SET path = ? WHERE id_user = ?")
+		stmtUp.Exec(caminho, id)
+		c.JSON(200, "ATERADO COM SUCESSO")
+		return
+	}
+
+	stmt, _ := db.Prepare("INSERT INTO avatar(path, id_user) VALUES(?,?) ")
+	stmt.Exec(caminho, id)
+	c.JSON(200, "AVATAR ADICIONADO")
+}
+
+func getImageAvatar(c *gin.Context) {
+	id := c.Param("id")
+	var path string
+	db.QueryRow(`SELECT a.path FROM users u
+	JOIN avatar a
+	ON a.id_user = u.id 
+	WHERE u.id = ?`, id).Scan(&path)
+	c.Redirect(http.StatusMovedPermanently, path)
+
+}
+
 func deletarUser(c *gin.Context) {
 	email := c.PostForm("email")
 	password := c.PostForm("password")
@@ -333,14 +454,20 @@ func deletarUser(c *gin.Context) {
 
 func main() {
 	router := gin.Default()
-	router.Use(cors.Default())
 
+	router.Static("/avatar", "./avatares")
+
+	router.Use(CORSMiddleware())
 	router.POST("/cadastro/", cadastroUser)
 	router.POST("/cadastroLivro/:id", auth, cadastrarLivro)
 	router.POST("/deleteUser/", auth, deletarUser)
 	router.POST("/isLogin/", isLogin)
+	router.POST("/alterar/:id", auth, alterarUser)
+	router.POST("/upload/:id", uploadAvatar)
 	router.GET("/getLivros/:id", auth, getLivros)
+	router.GET("/dados/:id", auth, getTotDadosUser)
 	router.GET("/getUser/:email", auth, getUser)
+	router.GET("/getAvatar/:id", auth, getImageAvatar)
 	router.DELETE("/deleteLivro/:id/:livro", auth, deleteLivro)
 	router.Run(":9000")
 }

@@ -4,8 +4,8 @@
     <b-navbar-brand ><h3  style="color:#ffffff; font-weight:bold">HOME</h3></b-navbar-brand>
 
        <b-navbar-nav nav class="ml-4">
-        <b-nav-item href="#" ><p style="color:#ffffff; font-weight:bold">Livros</p></b-nav-item>
-        <b-nav-item href="#"><p style="color:#ffffff; font-weight:bold">Locações</p></b-nav-item>
+        <b-nav-item href="#" class="bg-success" style="margin-right:10px"><p style="color:#ffffff; font-weight:bold">Livros</p></b-nav-item>
+        <b-nav-item href="#" class="bg-success" ><p style="color:#ffffff; font-weight:bold">Locações</p></b-nav-item>
       </b-navbar-nav>
      <b-navbar-nav class="ml-auto">
        <b-nav-item-dropdown right>

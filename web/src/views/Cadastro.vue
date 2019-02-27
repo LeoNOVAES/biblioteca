@@ -60,14 +60,11 @@
                                 <label for="rua">Rua</label>
                                 <input type="text" v-model="endereco.rua" class="form-control" id="rua" aria-describedby="rua" placeholder="Rua">
                             </div>
-                             <div class="form-group col-lg-6">
+                             <div class="form-group col-lg-12">
                                 <label for="bairro">Bairro</label>
                                 <input type="bairro" v-model="endereco.bairro" class="form-control" id="bairro" aria-describedby="bairro" placeholder="Bairro">
                             </div>
-                             <div class="form-group col-lg-6">
-                                <label for="numero">Numero</label>
-                                <input type="number" v-model="endereco.numero"  class="form-control" id="numero" aria-describedby="numero" placeholder="Numero">
-                            </div>
+                             
                         </div>
                         </form>
                     </b-card-text>
@@ -120,8 +117,7 @@ export default {
       endereco:{
          cidade:'',
          rua:'',
-         bairro:'',
-         numero:''
+         bairro:''
       },
       erros:[]
     }
@@ -129,15 +125,14 @@ export default {
   methods:{
       async isCadastro(e){
 
-if(this.$data.user.nome && this.$data.user.email && this.$data.endereco.cidade && this.$data.endereco.rua && this.$data.endereco.bairro && this.$data.endereco.numero && this.$data.user.senha && this.$data.user.senhaConf){
+if(this.$data.user.nome && this.$data.user.email && this.$data.endereco.cidade && this.$data.endereco.rua && this.$data.endereco.bairro  && this.$data.user.senha && this.$data.user.senhaConf){
                 var form = new FormData()
 
                 form.append("nome",this.$data.user.nome)
                 form.append("email",this.$data.user.email)
-                form.append("cidade",this.$data.user.cidade)
-                form.append("rua",this.$data.user.rua)
-                form.append("bairro",this.$data.user.bairro)
-                form.append("numero",this.$data.user.numero)
+                form.append("cidade",this.$data.endereco.cidade)
+                form.append("rua",this.$data.endereco.rua)
+                form.append("bairro",this.$data.endereco.bairro)
              
                 if(this.$data.user.senha == this.$data.user.senhaConf){
                     form.append("password",this.$data.user.senha)
@@ -198,9 +193,7 @@ if(this.$data.user.nome && this.$data.user.email && this.$data.endereco.cidade &
                this.$data.erros.push("O Email é Obrigatorio")
           } 
           
-          if(!this.$data.endereco.numero){
-               this.$data.erros.push("O Numero é Obrigatorio")
-          } 
+        
           
           if(!this.$data.user.senha){
                this.$data.erros.push("A Senha é Obrigatorio")
