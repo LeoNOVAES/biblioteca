@@ -16,6 +16,15 @@
 CREATE DATABASE IF NOT EXISTS `biblioteca` /*!40100 DEFAULT CHARACTER SET latin1 */;
 USE `biblioteca`;
 
+-- Copiando estrutura para tabela biblioteca.avatar
+CREATE TABLE IF NOT EXISTS `avatar` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `path` varchar(100) NOT NULL,
+  `id_user` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+-- Exportação de dados foi desmarcado.
 -- Copiando estrutura para tabela biblioteca.endereco
 CREATE TABLE IF NOT EXISTS `endereco` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -24,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `endereco` (
   `rua` varchar(100) DEFAULT NULL,
   `id_user` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 -- Exportação de dados foi desmarcado.
 -- Copiando estrutura para tabela biblioteca.estante
@@ -63,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `ligacao1` (
   CONSTRAINT `ligacao1_ibfk_3` FOREIGN KEY (`id_endereco`) REFERENCES `endereco` (`id`),
   CONSTRAINT `ligacao1_ibfk_4` FOREIGN KEY (`id_livros`) REFERENCES `livros` (`id`),
   CONSTRAINT `ligacao1_ibfk_5` FOREIGN KEY (`id_genero`) REFERENCES `generos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 -- Exportação de dados foi desmarcado.
 -- Copiando estrutura para tabela biblioteca.livros
@@ -84,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 -- Exportação de dados foi desmarcado.
 -- Copiando estrutura para view biblioteca.vis_livros
