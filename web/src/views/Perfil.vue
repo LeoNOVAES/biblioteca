@@ -38,11 +38,17 @@ export default {
       :footer-text-variant="white"
     >
       <b-container fluid>
+         
            <form >  
                
                <div class="row">
-                  <div class="form-group col-lg-12">
-                    <div style="width:50%;height:100px; background-color:#dddddd"><img src="img.png"/></div>
+                  <div class="form-group col-lg-6">
+                      <div class="avatar"><img id="img" :src="avatar"/></div>
+                 </div>
+                  <div class="form-group col-lg-6">
+                      <label>Mudar sua foto</label>
+                      <input type="file" id="foto" @change="mudarFoto($event)"/>
+                      
                  </div>
 
                  <div style="font-weight:bold; margin-top:10px; border:1px solid #000000"  class="form-group col-lg-12"> Dados </div>
@@ -108,8 +114,8 @@ export default {
             rua:'',
             bairro:'',
         },
-        erros:0
-      
+        avatar:"",
+        foto:""
       }
     },
 
@@ -127,12 +133,23 @@ export default {
             this.$data.endereco.cidade = res.cidade
             this.$data.endereco.rua = res.rua
             this.$data.endereco.bairro = res.bairro
+            
+            const reqF = await fetch(`http://localhost:9000/imagemE/${this.$id}`,{
+              headers:{
+                Authorization:token
+              }
+            })
+
+            const resF = await reqF.json()
+            if(resF == false){
+                 this.$data.avatar = "http://localhost:9000/avatar/default.png"
+            }else{
+                  this.$data.avatar = "http://localhost:9000/getAvatar/"+this.$id
+            }
+            
         },
 
-        async getAvatar(){
-          const token = localStorage.getItem("token")
-        },
-
+          
         async setDados(){
 
               let form = new FormData()
@@ -172,10 +189,39 @@ export default {
             })
             
             this.show=false
-        }
-    },
-    created(){
+        },
 
+        async mudarFoto(e){
+          this.$data.foto = e.target.files[0]
+          document.getElementById('img').src = window.URL.createObjectURL(this.foto)
+          let form = new FormData();
+
+          form.append("avatar", this.$data.foto)
+          const req = await fetch(`http://localhost:9000/upload/${this.$id}`,{
+            method:"POST",
+            body:form
+          })
+
+          const res = await req.json()
+          console.log(res)
+
+        }
+
+      
+        
     }
   }
 </script>
+
+<style >
+
+  .avatar img{
+    max-width: 7rem;
+  }
+
+  
+  
+
+
+
+</style>

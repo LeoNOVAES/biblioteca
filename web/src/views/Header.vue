@@ -10,7 +10,7 @@
      <b-navbar-nav class="ml-auto">
        <b-nav-item-dropdown right>
           <!-- Using button-content slot -->
-          <template  slot="button-content" ><em style="color:#ffffff"><img src="image.png" /></em></template>
+          <template  slot="button-content" ><em style="color:#ffffff"><img :src="avatar" width="50" height="50" /></em></template>
             <Perfil/>
           <a style="width:100%" class="btn btn-default" @click="sair">Sair</a>
         </b-nav-item-dropdown>
@@ -24,15 +24,31 @@
 <script>
 import Perfil from "@/views/Perfil"
 export default {
+
   components:{
     Perfil
+  },
+  props:["avatar"],
+  data(){
+    return {
+      
+
+    }
   },
   methods:{
         sair(){
             localStorage.removeItem("token")
              location.reload();     
+        },
+         async getAvatar(){
+          alert(this.avatar)
         }
-    }
+  },
+  mounted(){
+    this.getAvatar()
+  }
+ 
+
 }
 </script>
 

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Header/>
+        <Header :avatar="this.$id"/>
         <div class="container-fluid bg-success banner" >
             
         </div>  
@@ -13,6 +13,9 @@ import Vue from "vue"
 
 export default {
     components:{Header},
+    data(){
+        image:''
+    },
     methods:{
         async getPrototypes(){
             let token = localStorage.getItem("token")
@@ -27,6 +30,7 @@ export default {
                 Vue.prototype.$nome = res.nome  
                 Vue.prototype.$email = res.email
                 Vue.prototype.$id = res.id
+                this.$data.image = res.id
             }
     },
     created(){

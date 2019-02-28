@@ -341,7 +341,6 @@ func alterarUser(c *gin.Context) {
 	rua := c.PostForm("rua")
 	bairro := c.PostForm("bairro")
 	password := c.PostForm("password")
-
 	pass := encriptar(password)
 
 	if len(name) > 0 {
@@ -411,6 +410,21 @@ func uploadAvatar(c *gin.Context) {
 	c.JSON(200, "AVATAR ADICIONADO")
 }
 
+func imageExists(c *gin.Context) {
+	id := c.Param("id")
+	var av bool
+
+	var nu int
+	db.QueryRow("SELECT COUNT(*) FROM avatar WHERE id_user = ?", id).Scan(&nu)
+
+	if nu != 0 {
+		av = true
+	} else {
+		av = false
+	}
+	c.JSON(200, av)
+}
+
 func getImageAvatar(c *gin.Context) {
 	id := c.Param("id")
 	var path string
@@ -465,9 +479,10 @@ func main() {
 	router.POST("/alterar/:id", auth, alterarUser)
 	router.POST("/upload/:id", uploadAvatar)
 	router.GET("/getLivros/:id", auth, getLivros)
+	router.GET("/imagemE/:id", auth, imageExists)
 	router.GET("/dados/:id", auth, getTotDadosUser)
 	router.GET("/getUser/:email", auth, getUser)
-	router.GET("/getAvatar/:id", auth, getImageAvatar)
+	router.GET("/getAvatar/:id", getImageAvatar)
 	router.DELETE("/deleteLivro/:id/:livro", auth, deleteLivro)
 	router.Run(":9000")
 }
